@@ -7,3 +7,5 @@ We will be allowing the user to control the skaters respective masses and intial
 We will graph or display the kinetic energy of the system, their angular velocities, and their linear velocities.
 
 
+![Original Problem](originalProblem.png)
+
