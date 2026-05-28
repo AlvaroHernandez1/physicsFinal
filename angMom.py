@@ -7,7 +7,9 @@ class Skater
         self.mass = mass
         self.collision_position = collision_position
 
-     
+    def updatePosition(time):
+        self.position += self.velocity * time
+
 
 class Pole
     def __init__(mass, length):
@@ -18,12 +20,15 @@ class Pole
         self.velocity = 0
 
 
+
 scene = canvas(width=600, height=600, background=color.white)
 scene.ambient = color.white
 scene.lights = []
 scene.userspin = True
 scene.userpan = True
 scene.range = 100
+button(bind=reset_simulation, text="Reset Simulation")
+
 ice_texture = "https://i.imgur.com/SCIkDjk.png"
 tiles = 4
 tile = 0
@@ -36,4 +41,7 @@ while (tile < tiles):
     box (pos=vector(x,y,0), size=vector(200,200,0.1), texture=ice_texture)
     tile+=1
 
+
+def reset_simulation():
+    scene.camera.pos = vector(0,0,0)
 
