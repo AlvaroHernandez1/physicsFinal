@@ -1,33 +1,43 @@
 from vpython import *
 
-class Skater
-    def __init__(position, velocity, mass, collision_position):
+class Skater:
+    def __init__(self, position, velocity, mass, collision_position):
         self.position = position
         self.velocity = velocity
         self.mass = mass
         self.collision_position = collision_position
+        self.ball = sphere(pos=self.position, radius = 30, color = color.cyan)
 
-    def updatePosition(time):
+    def updatePosition(self, time):
         self.position += self.velocity * time
+        self.ball.pos = self.position
 
 
-class Pole
-    def __init__(mass, length):
+
+class Pole:
+    def __init__(self, mass, length):
         self.mass = mass
         self.length = length
         self.I = mass * length * length * (1/12)
 
         self.velocity = 0
 
-
+def reset_simulation():
+    isRunning = False
+    scene.camera.pos = vector(0,0,0)
 
 scene = canvas(width=600, height=600, background=color.white)
 scene.ambient = color.white
 scene.lights = []
-scene.userspin = True
-scene.userpan = True
+scene.userspin = False
+scene.userpan = False
 scene.range = 100
 button(bind=reset_simulation, text="Reset Simulation")
+isRunning = True
+skaterList = []
+skaterList.append(Skater(vector(0,0,10), vector(0, 75, 0), 10, 5))
+
+lastTime = 0
 
 ice_texture = "https://i.imgur.com/SCIkDjk.png"
 tiles = 4
@@ -42,6 +52,8 @@ while (tile < tiles):
     tile+=1
 
 
-def reset_simulation():
-    scene.camera.pos = vector(0,0,0)
+while isRunning:
+    rate(60)
+    skaterList[0].updatePosition(1/60.0)
+
 
