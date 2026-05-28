@@ -6,11 +6,15 @@ class Skater:
         self.velocity = velocity
         self.mass = mass
         self.collision_position = collision_position
-        self.ball = sphere(pos=self.position, radius = 30, color = color.cyan)
+        self.ball = sphere(pos=self.position, radius = 15, color = color.cyan)
 
     def updatePosition(self, time):
         self.position += self.velocity * time
         self.ball.pos = self.position
+
+    def updateL(self, cor):
+        r = self.position - cor
+        L = mag(cross(r, self.velocity))
 
 
 
@@ -35,7 +39,8 @@ scene.range = 100
 button(bind=reset_simulation, text="Reset Simulation")
 isRunning = True
 skaterList = []
-skaterList.append(Skater(vector(0,0,10), vector(0, 75, 0), 10, 5))
+skaterList.append(Skater(vector(-25,100,0), vector(0, -50, 0), 10, 5))
+skaterList.append(Skater(vector(25,-100,0), vector(0, 50, 0), 10, 5))
 
 lastTime = 0
 
@@ -54,6 +59,7 @@ while (tile < tiles):
 
 while isRunning:
     rate(60)
-    skaterList[0].updatePosition(1/60.0)
+    for skater in skaterList:
+        skater.updatePosition(1/60.0)
 
 
