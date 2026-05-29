@@ -16,6 +16,8 @@ class Skater:
     def updateL(self, cor):
         r = self.position - cor
         self.L = cross(r, self.velocity)
+        return self.L
+
         
 
 
@@ -66,11 +68,38 @@ while (tile < tiles):
     box (pos=vector(x,y,0), size=vector(200,200,0.1), texture=ice_texture)
     tile+=1
 
+ballsCollided = False
+
+com = vector(0, 0, 0)
+for skater in skaterList:
+    com += skater.mass * skater.position
+com += pole.mass * pole.position
+totMass = 0
+for skater in skaterList:
+    totMass += skater.mass
+totMass += pole.mass
+
+com /= totMass
+
+print (com)
+sysAngMom = vector(0, 0, 0)
+for skater in skaterList:
+    sysAngMom += skater.updateL(com)
+
+sysMom = vector(0, 0, 0)
+for skater in skaterList:
+    sysMom += skater.mass * skater.velocity
 
 while isRunning:
     rate(60)
+
     for skater in skaterList:
-        skater.updatePosition(1/60.0)
+        if abs(skater.position.y) > 15 and not ballsCollided:
+            skater.updatePosition(1/60.0)
+        else:
+            ballsCollided = True
+    #if ballsCollided:
+        #for skater in skaterList
     
 
 
