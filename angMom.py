@@ -43,12 +43,11 @@ skaterList = []
 skaterList.append(Skater(vector(-25,100,0), vector(0, -50, 0), 10, 5))
 skaterList.append(Skater(vector(25,-100,0), vector(0, 50, 0), 10, 5))
 pole = Pole(10, 92)
-
-lastTime = 0
+ballsCollided = False
 
 def reset_simulation():
     isRunning = False
-    scene.camera.pos = vector(0,0,0)
+    scene.camera.pos = vector(0,0,173)
     for skater in skaterList:
         skater.ball.visible = False
         del skater
@@ -68,8 +67,6 @@ while (tile < tiles):
     box (pos=vector(x,y,0), size=vector(200,200,0.1), texture=ice_texture)
     tile+=1
 
-ballsCollided = False
-
 com = vector(0, 0, 0)
 for skater in skaterList:
     com += skater.mass * skater.position
@@ -81,7 +78,6 @@ totMass += pole.mass
 
 com /= totMass
 
-print (com)
 sysAngMom = vector(0, 0, 0)
 for skater in skaterList:
     sysAngMom += skater.updateL(com)
@@ -98,8 +94,12 @@ while isRunning:
             skater.updatePosition(1/60.0)
         else:
             ballsCollided = True
-    #if ballsCollided:
-        #for skater in skaterList
+    if ballsCollided:
+        sysInertia = pole.I
+        for skater in skaterList:
+            sysInertia += skater.mass * (mag(skater.position - com)**2)
+        angVelocity = sysAngMom / sysInertia
+        
     
 
 
