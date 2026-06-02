@@ -6,18 +6,23 @@ class Skater:
         self.velocity = velocity
         self.mass = mass
         self.collision_position = collision_position
-        self.ball = sphere(pos=self.position, radius = 15, color = color.cyan)
+        self.ball = sphere(pos=self.position * 100, radius = 15, color = color.cyan)
         self.L = 0
+        
 
     def updatePosition(self, time):
         self.position += self.velocity * time
-        self.ball.pos = self.position
+        self.ball.pos = self.position * 100.0
+        
 
     def updateL(self, cor):
         r = self.position - cor
-        self.L = cross(r, self.velocity)
+        self.L = self.mass * cross(r, self.velocity)
         return self.L
 
+    def rotateVelocity(self, angVelocity, cor):
+        self.velocity = cross(angVelocity, (self.position - cor))
+    
         
 
 
@@ -29,7 +34,7 @@ class Pole:
         self.I = mass * length * length * (1/12)
         self.velocity = vector(0,0,0)
         self.position = vector(0,0,0)
-        self.body = box(pos=self.position, length = self.length, width = 1, height = 10, color = color.cyan)
+        self.body = box(pos=self.position, length = self.length * 100, width = 1, height = 10, color = color.cyan)
 
 
 scene = canvas(width=600, height=600, background=color.white)
@@ -40,9 +45,9 @@ scene.userpan = False
 scene.range = 100
 isRunning = True
 skaterList = []
-skaterList.append(Skater(vector(-25,100,0), vector(0, -50, 0), 10, 5))
-skaterList.append(Skater(vector(25,-100,0), vector(0, 50, 0), 10, 5))
-pole = Pole(10, 92)
+skaterList.append(Skater(vector(-0.25,1.00,0.0), vector(0, -1.00, 0), 10, 5))
+skaterList.append(Skater(vector(0.25,-1.00,0), vector(0, 1.00, 0), 10, 5))
+pole = Pole(0, 1.0)
 ballsCollided = False
 
 def reset_simulation():
@@ -86,20 +91,29 @@ sysMom = vector(0, 0, 0)
 for skater in skaterList:
     sysMom += skater.mass * skater.velocity
 
+prevTime = 0
+
 while isRunning:
     rate(60)
 
     for skater in skaterList:
-        if abs(skater.position.y) > 15 and not ballsCollided:
+        if not ballsCollided and abs(skater.position.y) > 0.15:
             skater.updatePosition(1/60.0)
+            
         else:
             ballsCollided = True
     if ballsCollided:
         sysInertia = pole.I
         for skater in skaterList:
             sysInertia += skater.mass * (mag(skater.position - com)**2)
+
         angVelocity = sysAngMom / sysInertia
-        
+        for skater in skaterList:
+            skater.ball.rotate(angle=mag(angVelocity)*60.0, axis=com*100.0+vector(0,0.0, 1.0))
+            skater.position = skater.ball.pos/100.0
+            #skater.rotateVelocity(angVelocity, com)
+
+            #skater.updatePosition(1/60.0)
     
 
 
