@@ -45,8 +45,8 @@ scene.userpan = False
 scene.range = 100
 isRunning = True
 skaterList = []
-skaterList.append(Skater(vector(-0.25,1.00,0.0), vector(0, -1.00, 0), 10, 5))
-skaterList.append(Skater(vector(0.25,-1.00,0), vector(0, 1.00, 0), 10, 5))
+skaterList.append(Skater(vector(0.25,1.00,0.0), vector(0, -1.00, 0), 10, 5))
+skaterList.append(Skater(vector(-0.25,-1.00,0), vector(0, 1.00, 0), 10, 5))
 pole = Pole(0, 1.0)
 ballsCollided = False
 
@@ -56,7 +56,10 @@ def reset_simulation():
     for skater in skaterList:
         skater.ball.visible = False
         del skater
-    isRunning = True
+    pole.box.visible = False
+    pole = Pole(0,1.0)
+    ballsCollided = False
+
 
 button(bind=reset_simulation, text="Reset Simulation")
 
@@ -99,7 +102,6 @@ while isRunning:
     for skater in skaterList:
         if not ballsCollided and abs(skater.position.y) > 0.15:
             skater.updatePosition(1/60.0)
-            
         else:
             ballsCollided = True
     if ballsCollided:
@@ -109,11 +111,11 @@ while isRunning:
 
         angVelocity = sysAngMom / sysInertia
         for skater in skaterList:
-            skater.ball.rotate(angle=mag(angVelocity)*60.0, axis=com*100.0+vector(0,0.0, 1.0))
+            skater.ball.rotate(angle=mag(angVelocity)/60.0, axis = angVelocity, origin=com*100.0)
+            print(mag(angVelocity)/60.0)
+            print('')
             skater.position = skater.ball.pos/100.0
-            #skater.rotateVelocity(angVelocity, com)
-
-            #skater.updatePosition(1/60.0)
+        pole.body.rotate(angle=mag(angVelocity)/60.0, axis = angVelocity, origin = com*100.0)
     
 
 
