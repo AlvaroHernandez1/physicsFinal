@@ -45,23 +45,77 @@ scene.userpan = False
 scene.range = 100
 isRunning = True
 skaterList = []
-skaterList.append(Skater(vector(0.25,1.00,0.0), vector(0, -1.00, 0), 10, 5))
-skaterList.append(Skater(vector(-0.25,-1.00,0), vector(0, 1.00, 0), 10, 5))
-pole = Pole(0, 1.0)
+#skaterList.append(Skater(vector(0.25,1.00,0.0), vector(0, -1.00, 0), 10, 5))
+#skaterList.append(Skater(vector(-0.25,-1.00,0), vector(0, 1.00, 0), 10, 5))
+pole = Pole(1, 1.0)
 ballsCollided = False
 
-def reset_simulation():
-    isRunning = False
+com = vector(0, 0, 0)
+totMass = 0
+sysAngMom = vector(0, 0, 0)
+sysMom = vector(0, 0, 0)
+
+def start_simulation(evt):
+    evt.disabled = True
+
+    evt.current_skaters.append(Skater(vector(0.25,1.00,0.0), vector(0, -1.00, 0), 10, 5))
+    evt.current_skaters.append(Skater(vector(-0.25,-1.00,0), vector(0, 1.00, 0), 10, 5))
+
+    global com
+    global totMass
+    global sysAngMom
+    global sysMom
+    global ballsCollided
+    ballsCollided = False
+
+    com = vector(0, 0, 0)
+    totMass = 0
+    sysAngMom = vector(0, 0, 0)
+    sysMom = vector(0, 0, 0)
+
+    for skater in skaterList:
+        com += skater.mass * skater.position
+    com += pole.mass * pole.position
+
+    for skater in skaterList:
+        totMass += skater.mass
+    totMass += pole.mass
+
+    com /= totMass
+
+    for skater in skaterList:
+        sysAngMom += skater.updateL(com)
+
+    for skater in skaterList:
+        sysMom += skater.mass * skater.velocity 
+
+
+
+    
+
+
+def reset_simulation(evt):
+
+    #global isRunning
+    #isRunning = False
+    
     scene.camera.pos = vector(0,0,173)
     for skater in skaterList:
         skater.ball.visible = False
-        del skater
-    pole.box.visible = False
-    pole = Pole(0,1.0)
+        #del skater
+        #skaterList.remove(0)
+    skaterList.clear()
+
+    global ballsCollided
     ballsCollided = False
+    #evt.current_pole.body.visible = False
+    evt.current_pole.body.axis = vector(evt.current_pole.length * 100, 0.0, 0.0)
+
+    evt.start_button.disabled = False
 
 
-button(bind=reset_simulation, text="Reset Simulation")
+startButton = button(bind=start_simulation, text="Start Simulation", current_skaters = skaterList)
+resetButon = button(bind=reset_simulation, text="Reset Simulation", current_pole = pole, start_button = startButton)
 
 ice_texture = "https://i.imgur.com/SCIkDjk.png"
 tiles = 4
@@ -75,35 +129,10 @@ while (tile < tiles):
     box (pos=vector(x,y,0), size=vector(200,200,0.1), texture=ice_texture)
     tile+=1
 
-com = vector(0, 0, 0)
-for skater in skaterList:
-    com += skater.mass * skater.position
-com += pole.mass * pole.position
-totMass = 0
-for skater in skaterList:
-    totMass += skater.mass
-totMass += pole.mass
 
-com /= totMass
-
-sysAngMom = vector(0, 0, 0)
-for skater in skaterList:
-    sysAngMom += skater.updateL(com)
-
-sysMom = vector(0, 0, 0)
-for skater in skaterList:
-    sysMom += skater.mass * skater.velocity
-
-prevTime = 0
 
 while isRunning:
     rate(60)
-
-    for skater in skaterList:
-        if not ballsCollided and abs(skater.position.y) > 0.15:
-            skater.updatePosition(1/60.0)
-        else:
-            ballsCollided = True
     if ballsCollided:
         sysInertia = pole.I
         for skater in skaterList:
@@ -112,10 +141,14 @@ while isRunning:
         angVelocity = sysAngMom / sysInertia
         for skater in skaterList:
             skater.ball.rotate(angle=mag(angVelocity)/60.0, axis = angVelocity, origin=com*100.0)
-            print(mag(angVelocity)/60.0)
-            print('')
             skater.position = skater.ball.pos/100.0
         pole.body.rotate(angle=mag(angVelocity)/60.0, axis = angVelocity, origin = com*100.0)
+    else:
+        for skater in skaterList:
+            if not ballsCollided and abs(skater.position.y) > 0.15:
+                skater.updatePosition(1/60.0)
+            else:
+                ballsCollided = True
     
 
 
