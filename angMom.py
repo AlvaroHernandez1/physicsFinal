@@ -72,8 +72,8 @@ comBall = sphere(pos = com*100, radius = 4)
 angMomGraph = graph(title = "Angular Momentum Per Trial", xtitle = "Trial", ytitle = "Angular Momentum", align = "left", xmin = 0, ymin = 0)
 angMomBars = gvbars(graph = angMomGraph, delta = 0.25)
 
-linMomentumGraph = graph(title = "Linear Momentum Per Trial", xtitle = "Trial", ytitle = "Linear Momentum")
-linMomentumGraph = gvbars(graph = linMomentumGraph)
+linMomentumGraph = graph(title = "Linear Momentum Per Trial", xtitle = "Trial", ytitle = "Linear Momentum", align = "left", xmin = 0, ymin = 0)
+linMomentumBars = gvbars(graph = linMomentumGraph, delta = 0.25)
 
 kineticEnergyGraph = graph(title = "Kinetic Energy Over Time", xtitle = "Time", ytitle = "Kinetic Energy")
 kineticEnergyCurve = gcurve(graph = kineticEnergyGraph)
@@ -95,6 +95,10 @@ def start_simulation(evt):
     # Globals for creating graphs
     global angMomGraph
     global angMomBars
+
+    global linMomentumGraph
+    global linMomentumBars
+
     global trial
 
     # Balls stop being collided
@@ -129,6 +133,7 @@ def start_simulation(evt):
 
     # Plot graphs
     angMomBars.plot(trial, mag(sysAngMom))
+    linMomentumBars.plot(trial, mag(sysMom))
     
 
 
