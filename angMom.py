@@ -79,6 +79,7 @@ def start_simulation(evt):
     totMass = 0
     sysAngMom = vector(0, 0, 0)
     sysMom = vector(0, 0, 0)
+    sysVelocity = vector(0, 0, 0)
 
     for skater in skaterList:
         com += skater.mass * skater.position
@@ -106,6 +107,8 @@ def reset_simulation(evt):
 
     #global isRunning
     #isRunning = False
+    global com
+    global sysVelocity
     
     scene.camera.pos = vector(0,0,173)
     for skater in skaterList:
@@ -119,6 +122,11 @@ def reset_simulation(evt):
     #evt.current_pole.body.visible = False
     evt.current_pole.body.axis = vector(evt.current_pole.length * 100, 0.0, 0.0)
     evt.current_pole.velocity = vector(0, 0, 0)
+    evt.current_pole.position = vector(0, 0, 0)
+    evt.current_pole.body.pos = vector(0, 0, 0)
+
+    com = vector(0, 0, 0)
+    sysVelocity = vector(0, 0, 0)
 
     evt.start_button.disabled = False
 
