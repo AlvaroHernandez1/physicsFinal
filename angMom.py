@@ -69,8 +69,8 @@ sysVelocity = vector(0, 0, 0)
 comBall = sphere(pos = com*100, radius = 4)
 
 # Graphs
-angMomGraph = graph(title = "Angular Momentum Per Trial", xtitle = "Trial", ytitle = "Angular Momentum")
-angMomBars = gvbars(graph = angMomGraph)
+angMomGraph = graph(title = "Angular Momentum Per Trial", xtitle = "Trial", ytitle = "Angular Momentum", align = "left", xmin = 0, ymin = 0)
+angMomBars = gvbars(graph = angMomGraph, delta = 0.25)
 
 linMomentumGraph = graph(title = "Linear Momentum Per Trial", xtitle = "Trial", ytitle = "Linear Momentum")
 linMomentumGraph = gvbars(graph = linMomentumGraph)
@@ -95,6 +95,7 @@ def start_simulation(evt):
     # Globals for creating graphs
     global angMomGraph
     global angMomBars
+    global trial
 
     # Balls stop being collided
     ballsCollided = False
@@ -127,7 +128,7 @@ def start_simulation(evt):
     trial += 1
 
     # Plot graphs
-    angMomBars.plot(trial, sysAngMom)
+    angMomBars.plot(trial, mag(sysAngMom))
     
 
 
