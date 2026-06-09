@@ -46,12 +46,19 @@ scene.lights = []
 scene.userspin = False
 scene.userpan = False
 scene.range = 100
+
+# Controller for loop
 isRunning = True
+
+# Objects
 skaterList = []
-#skaterList.append(Skater(vector(0.25,1.00,0.0), vector(0, -1.00, 0), 10, 5))
-#skaterList.append(Skater(vector(-0.25,-1.00,0), vector(0, 1.00, 0), 10, 5))
 pole = Pole(1, 1.0)
+
+# Balls start not collided
 ballsCollided = False
+
+# Trials start at 0
+trial = 0
 
 com = vector(0, 0, 0)
 totMass = 0
@@ -61,20 +68,38 @@ sysVelocity = vector(0, 0, 0)
 
 comBall = sphere(pos = com*100, radius = 4)
 
+# Graphs
+angMomGraph = graph(title = "Angular Momentum Per Trial", xtitle = "Trial", ytitle = "Angular Momentum")
+angMomBars = gvbars(graph = angMomGraph)
+
+linMomentumGraph = graph(title = "Linear Momentum Per Trial", xtitle = "Trial", ytitle = "Linear Momentum")
+linMomentumGraph = gvbars(graph = linMomentumGraph)
+
+kineticEnergyGraph = graph(title = "Kinetic Energy Over Time", xtitle = "Time", ytitle = "Kinetic Energy")
+kineticEnergyCurve = gcurve(graph = kineticEnergyGraph)
+
 def start_simulation(evt):
     evt.disabled = True
 
     evt.current_skaters.append(Skater(vector(0.25,1.00,0.0), vector(0, -1.00, 0), 20, 5))
     evt.current_skaters.append(Skater(vector(-0.25,-1.00,0), vector(0, 1.00, 0), 10, 5))
 
+    # Globals for calculating movement
     global com
     global totMass
     global sysAngMom
     global sysMom
     global ballsCollided
     global sysVelocity
+
+    # Globals for creating graphs
+    global angMomGraph
+    global angMomBars
+
+    # Balls stop being collided
     ballsCollided = False
 
+    # Recalculate movement values
     com = vector(0, 0, 0)
     totMass = 0
     sysAngMom = vector(0, 0, 0)
@@ -97,8 +122,11 @@ def start_simulation(evt):
         sysMom += skater.mass * skater.velocity 
     sysVelocity = sysMom / totMass
 
+    # Update trial number
+    trial += 1
 
-
+    # Plot graphs
+    angMomBars.plot(trial, sysAngMom)
     
 
 
