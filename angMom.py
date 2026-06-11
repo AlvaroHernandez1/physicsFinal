@@ -1,4 +1,3 @@
-Web VPython 3.2
 from vpython import *
 
 class Skater:
@@ -99,11 +98,70 @@ linMomentumBars = gvbars(graph = linMomentumGraph, delta = 0.25)
 kineticEnergyGraph = graph(title = "Kinetic Energy Over Time", xtitle = "Time", ytitle = "Kinetic Energy", align = "left", xmin = 0, ymin = 0)
 kineticEnergyCurve = gcurve(graph = kineticEnergyGraph)
 
+#User Interface ---Would Love to figure out how to put this on the rirght side!
+scene.append_to_caption("Skater 1\n")
+scene.append_to_caption("Mass: ")
+s1MassText = wtext(text="10")
+def updateS1Mass(s): 
+    s1MassText.text = str(int(s.value))
+scene.append_to_caption(" kg")
+s1Mass = slider(min=1, max=50, value=10, step=1, bind=updateS1Mass)
+
+scene.append_to_caption("  X position: ")
+s1XText = wtext(text="-0.25")
+def updateS1X(s): 
+    s1XText.text = str(s.value)
+scene.append_to_caption(" m")
+
+s1X = slider(min=-0.5, max=0.0, value=-0.25, step=0.05, bind=updateS1X)
+
+scene.append_to_caption("  Speed: ")
+s1VText = wtext(text="1.0")
+scene.append_to_caption(" m/s")
+def updateS1V(s): 
+    s1VText.text = str(s.value)
+s1V = slider(min=0.5, max=3.0, value=1.0, step=0.1, bind=updateS1V)
+
+scene.append_to_caption("\n\nSkater 2\n")
+scene.append_to_caption("Mass: ")
+s2MassText = wtext(text="10")
+scene.append_to_caption(" kg")
+def updateS2Mass(s): 
+    s2MassText.text = str(int(s.value))
+s2Mass = slider(min=1, max=50, value=10, step=1, bind=updateS2Mass)
+
+scene.append_to_caption("  X position: ")
+s2XText = wtext(text="0.25")
+scene.append_to_caption(" m")
+def updateS2X(s): 
+    s2XText.text = str(s.value)
+s2X = slider(min=0.0, max=0.5, value=0.25, step=0.05, bind=updateS2X)
+
+scene.append_to_caption("  Speed: ")
+s2VText = wtext(text="1.0")
+scene.append_to_caption(" m/s")
+def updateS2V(s): 
+    s2VText.text = str(s.value)
+s2V = slider(min=0.5, max=3.0, value=1.0, step=0.1, bind=updateS2V)
+
+scene.append_to_caption("\n\n")
+scene.append_to_caption("Time to Collision: ")
+timeText = wtext(text="1.0")
+scene.append_to_caption(" s")
+def updateTimeToCollission(s): 
+    timeText.text = str(s.value)
+timeToCollision = slider(min=1, max=5.0, value=1.0, step=1, bind=updateTimeToCollission)
+
+
+
+scene.append_to_caption("\n\n")
+
 def start_simulation(evt):
     evt.disabled = True
 
-    evt.current_skaters.append(Skater(vector(0.25,1.00,0.0), vector(0, -1.00, 0), 10, 5))
-    evt.current_skaters.append(Skater(vector(-0.25,-1.00,0), vector(0, 1.00, 0), 10, 5))
+    # Y position is equal to Time * Velocity, to make the both balls collide at same time
+    evt.current_skaters.append(Skater(vector(s1X.value, timeToCollision.value * s1V.value, 0), vector(0, -s1V.value, 0), s1Mass.value, 5))
+    evt.current_skaters.append(Skater(vector(s2X.value, -timeToCollision.value * s2V.value, 0), vector(0, s2V.value, 0), s2Mass.value, 5))
 
     # Globals for calculating movement
     global com
@@ -248,14 +306,14 @@ while isRunning:
         com += sysVelocity/60.0
         comBall.pos = com*100
         for skater in skaterList:
-            if not ballsCollided and abs(skater.position.y) > 0.15:
-                skater.updatePosition(1/60.0)
-            
-            else:
-                ballsCollided = True
-                pole.velocity = sysVelocity
-                for skater in skaterList:
-                    skater.velocity = sysVelocity
+            skater.updatePosition(1/60.0)
+
+        if skaterList and skaterList[0].position.y <= 0:
+            ballsCollided = True
+            pole.velocity = sysVelocity
+            for skater in skaterList:
+                skater.velocity = sysVelocity
+                
         kineticEnergyCurve.plot(time, kineticEnergy)
     time += 1/60.0
 
