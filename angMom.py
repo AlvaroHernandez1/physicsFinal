@@ -1,12 +1,11 @@
 from vpython import *
 
 class Skater:
-    def __init__(self, position, velocity, mass, collision_position):
+    def __init__(self, position, velocity, mass, col):
         self.position = position
         self.velocity = velocity
         self.mass = mass
-        self.collision_position = collision_position
-        self.ball = sphere(pos=self.position * 100, radius = 15, color = color.cyan)
+        self.ball = sphere(pos=self.position * 100, radius = 15, color = eval("color." + col))
         self.L = 0
         self.K = 0.5 * mass * (mag(velocity)**2)
         
@@ -28,8 +27,8 @@ class Skater:
         I = self.mass * (mag(self.position - cor)**2)
         KR = 0.5 * I * (mag(angVelocity)**2)
         KT = 0.5 * self.mass * (mag(self.velocity)**2)
-        print('Ball rotational K: ', KR)
-        print('Ball translational K: ', KT)
+        #print('Ball rotational K: ', KR)
+        #print('Ball translational K: ', KT)
         self.K = KR + KT
         
 
@@ -59,7 +58,7 @@ class Pole:
         self.K = KR + KT
 
 
-scene = canvas(width=600, height=600, background=color.white)
+scene = canvas(width=600, height=600, background=color.white, align = "left")
 scene.ambient = color.white
 scene.lights = []
 scene.userspin = False
@@ -153,15 +152,45 @@ def updateTimeToCollission(s):
 timeToCollision = slider(min=1, max=5.0, value=1.0, step=1, bind=updateTimeToCollission)
 
 
+scene.append_to_caption("\n\n Skater One Color:")
 
-scene.append_to_caption("\n\n")
+colOne = 'cyan'
+colTwo = colOne
+
+def skaterOneColor(m):
+    global colOne
+    val = m.selected
+    colOne = val
+
+
+menu(choices=['Choose a Color', 'Blue', 'Green', 'Red', 'Yellow'], index=0, bind=skaterOneColor)
+
+scene.append_to_caption("Skater Two Color:")
+
+def skaterTwoColor(m):
+    global colTwo
+    val = m.selected
+    colTwo = val
+
+
+menu(choices=['Choose a Color', 'Blue', 'Green', 'Red', 'Yellow'], index=0, bind=skaterTwoColor)
+
+scene.append_to_caption('\n')
+
+
+scene.append_to_caption("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+
 
 def start_simulation(evt):
     evt.disabled = True
+    positionOnPole1.value = abs(s1X.value)
+    positionOnPole2.value = abs(s2X.value)
+    positionText1.text = str(abs(s1X.value))
+    positionText2.text = str(abs(s2X.value))
 
     # Y position is equal to Time * Velocity, to make the both balls collide at same time
-    evt.current_skaters.append(Skater(vector(s1X.value, timeToCollision.value * s1V.value, 0), vector(0, -s1V.value, 0), s1Mass.value, 5))
-    evt.current_skaters.append(Skater(vector(s2X.value, -timeToCollision.value * s2V.value, 0), vector(0, s2V.value, 0), s2Mass.value, 5))
+    evt.current_skaters.append(Skater(vector(s1X.value, timeToCollision.value * s1V.value, 0), vector(0, -s1V.value, 0), s1Mass.value, colOne))
+    evt.current_skaters.append(Skater(vector(s2X.value, -timeToCollision.value * s2V.value, 0), vector(0, s2V.value, 0), s2Mass.value, colTwo))
 
     # Globals for calculating movement
     global com
@@ -252,6 +281,29 @@ def reset_simulation(evt):
 startButton = button(bind=start_simulation, text="Start Simulation", current_skaters = skaterList)
 resetButon = button(bind=reset_simulation, text="Reset Simulation", current_pole = pole, start_button = startButton)
 
+#Moving Skaters on pole
+scene.append_to_caption("\n\nSkater One Position on Pole ")
+positionText1 = wtext(text="0.25")
+scene.append_to_caption(" m")
+def updatePositionOnPole1(s):
+    global ballsCollided
+    if ballsCollided:
+        positionText1.text = str(s.value)
+    else:
+        s.value = positionOnPole1.value
+positionOnPole1 = slider(min=0.1, max=0.5, value=abs(s1X.value), step=.1, bind=updatePositionOnPole1) # max should be pole length
+
+scene.append_to_caption("Skater One Position on Pole ")
+positionText2 = wtext(text="0.25")
+scene.append_to_caption(" m")
+def updatePositionOnPole2(s):
+    global ballsCollided
+    if ballsCollided:
+        positionText2.text = str(s.value)
+    else:
+        s.value = positionOnPole2.value
+positionOnPole2 = slider(min=0.1, max=0.5, value=abs(s1X.value), step=.1, bind=updatePositionOnPole2)
+
 ice_texture = "https://i.imgur.com/SCIkDjk.png"
 tiles = 4
 tile = 0
@@ -269,6 +321,34 @@ time = 0
 while isRunning:
     rate(60)
     if ballsCollided:
+        # Updating Ball Position
+        if len(skaterList) == 2:
+            skater1 = skaterList[0]
+            distance_vector = skater1.position - pole.position
+            distance_vector *= positionOnPole1.value/(mag(distance_vector))
+            skater1.position = distance_vector + pole.position
+            skater1.ball.pos = skater1.position * 100
+
+            # Update other skater
+            skater2 = skaterList[1]
+            distance_vector = skater2.position - pole.position
+            distance_vector *= positionOnPole2.value/(mag(distance_vector))
+            skater2.position = distance_vector + pole.position
+            skater2.ball.pos = skater2.position * 100
+
+        # Update COM
+        com = vector(0, 0, 0)
+        totMass = 0
+        for skater in skaterList:
+            com += skater.mass * skater.position
+        com += pole.mass * pole.position
+
+        for skater in skaterList:
+            totMass += skater.mass
+        totMass += pole.mass
+
+        com /= totMass
+
         sysInertia = pole.findI(com)
         for skater in skaterList:
             sysInertia += skater.mass * (mag(skater.position - com)**2)
