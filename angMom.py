@@ -30,6 +30,10 @@ class Skater:
         #print('Ball rotational K: ', KR)
         #print('Ball translational K: ', KT)
         self.K = KR + KT
+
+    def LWhileSpinning(self, angVelocity, cor):
+        I = self.mass * (mag(self.position - cor)**2)
+        return angVelocity * I
         
 
 
@@ -55,7 +59,11 @@ class Pole:
         I = self.findI(cor)
         KR = 0.5 * I * (mag(angVelocity)**2)
         KT = 0.5 * self.mass * (mag(self.velocity)**2)
+        print(angVelocity)
         self.K = KR + KT
+    def LWhileSpinning(self, angVelocity, cor):
+        I = self.findI(cor)
+        return I * angVelocity
 
 
 scene = canvas(width=600, height=600, background=color.white, align = "left")
@@ -88,13 +96,13 @@ kineticEnergy = 0
 comBall = sphere(pos = com*100, radius = 4)
 
 # Graphs
-angMomGraph = graph(title = "Angular Momentum Per Trial", xtitle = "Trial", ytitle = "Angular Momentum", align = "left", xmin = 0, ymin = 0)
-angMomBars = gvbars(graph = angMomGraph, delta = 0.25)
+angMomGraph = graph(title = "Angular Momentum Per Trial", xtitle = "Trial", ytitle = "Angular Momentum", align = "left", xmin = 0, ymin = 0, xmax = 10, scroll = True)
+angMomCurve = gcurve(graph = angMomGraph)
 
 linMomentumGraph = graph(title = "Linear Momentum Per Trial", xtitle = "Trial", ytitle = "Linear Momentum", align = "left", xmin = 0, ymin = 0)
 linMomentumBars = gvbars(graph = linMomentumGraph, delta = 0.25)
 
-kineticEnergyGraph = graph(title = "Kinetic Energy Over Time", xtitle = "Time", ytitle = "Kinetic Energy", align = "left", xmin = 0, ymin = 0)
+kineticEnergyGraph = graph(title = "Kinetic Energy Over Time", xtitle = "Time", ytitle = "Kinetic Energy", align = "left", xmin = 0, xmax = 10, scroll = True, ymin = 0)
 kineticEnergyCurve = gcurve(graph = kineticEnergyGraph)
 
 #User Interface ---Would Love to figure out how to put this on the rirght side!
@@ -106,16 +114,16 @@ def updateS1Mass(s):
 scene.append_to_caption(" kg")
 s1Mass = slider(min=1, max=50, value=10, step=1, bind=updateS1Mass)
 
-scene.append_to_caption("  X position: ")
-s1XText = wtext(text="-0.25")
+scene.append_to_caption("  X position: -")
+s1XText = wtext(text="0.25")
 def updateS1X(s): 
     s1XText.text = str(s.value)
 scene.append_to_caption(" m")
 
-s1X = slider(min=-0.5, max=0.0, value=-0.25, step=0.05, bind=updateS1X)
+s1X = slider(min=0.01, max=0.5, value=0.25, step=0.01, bind=updateS1X)
 
 scene.append_to_caption("  Speed: ")
-s1VText = wtext(text="1.0")
+s1VText = wtext(text="1")
 scene.append_to_caption(" m/s")
 def updateS1V(s): 
     s1VText.text = str(s.value)
@@ -134,10 +142,10 @@ s2XText = wtext(text="0.25")
 scene.append_to_caption(" m")
 def updateS2X(s): 
     s2XText.text = str(s.value)
-s2X = slider(min=0.0, max=0.5, value=0.25, step=0.05, bind=updateS2X)
+s2X = slider(min=0.01, max=0.5, value=0.25, step=0.01, bind=updateS2X)
 
 scene.append_to_caption("  Speed: ")
-s2VText = wtext(text="1.0")
+s2VText = wtext(text="1")
 scene.append_to_caption(" m/s")
 def updateS2V(s): 
     s2VText.text = str(s.value)
@@ -145,7 +153,7 @@ s2V = slider(min=0.5, max=3.0, value=1.0, step=0.1, bind=updateS2V)
 
 scene.append_to_caption("\n\n")
 scene.append_to_caption("Time to Collision: ")
-timeText = wtext(text="1.0")
+timeText = wtext(text="1")
 scene.append_to_caption(" s")
 def updateTimeToCollission(s): 
     timeText.text = str(s.value)
@@ -163,7 +171,7 @@ def skaterOneColor(m):
     colOne = val
 
 
-menu(choices=['Choose a Color', 'Blue', 'Green', 'Red', 'Yellow'], index=0, bind=skaterOneColor)
+menu(choices=['Choose a Color', 'blue', 'green', 'red', 'yellow'], index=0, bind=skaterOneColor)
 
 scene.append_to_caption("Skater Two Color:")
 
@@ -173,7 +181,7 @@ def skaterTwoColor(m):
     colTwo = val
 
 
-menu(choices=['Choose a Color', 'Blue', 'Green', 'Red', 'Yellow'], index=0, bind=skaterTwoColor)
+menu(choices=['Choose a Color', 'blue', 'green', 'red', 'yellow'], index=0, bind=skaterTwoColor)
 
 scene.append_to_caption('\n')
 
@@ -189,7 +197,7 @@ def start_simulation(evt):
     positionText2.text = str(abs(s2X.value))
 
     # Y position is equal to Time * Velocity, to make the both balls collide at same time
-    evt.current_skaters.append(Skater(vector(s1X.value, timeToCollision.value * s1V.value, 0), vector(0, -s1V.value, 0), s1Mass.value, colOne))
+    evt.current_skaters.append(Skater(vector(-1*s1X.value, timeToCollision.value * s1V.value, 0), vector(0, -s1V.value, 0), s1Mass.value, colOne))
     evt.current_skaters.append(Skater(vector(s2X.value, -timeToCollision.value * s2V.value, 0), vector(0, s2V.value, 0), s2Mass.value, colTwo))
 
     # Globals for calculating movement
@@ -245,7 +253,7 @@ def start_simulation(evt):
     trial += 1
 
     # Plot graphs
-    angMomBars.plot(trial, mag(sysAngMom))
+    #angMomBars.plot(trial, mag(sysAngMom))
     linMomentumBars.plot(trial, mag(sysMom))
     
 
@@ -256,19 +264,26 @@ def reset_simulation(evt):
     #isRunning = False
     global com
     global sysVelocity
+
+    global graphAngMom
+    #graphAngMom = 0
     
+    #global angVelocity
+    #angVelocity = 0
+
+    global sysAngMom
+    sysAngMom = 0
     scene.camera.pos = vector(0,0,173)
     for skater in skaterList:
         skater.ball.visible = False
         #del skater
         #skaterList.remove(0)
     skaterList.clear()
-
     global ballsCollided
     ballsCollided = False
     #evt.current_pole.body.visible = False
-    evt.current_pole.body.axis = vector(evt.current_pole.length * 100, 0.0, 0.0)
     evt.current_pole.velocity = vector(0, 0, 0)
+    evt.current_pole.body.axis = vector(evt.current_pole.length * 100, 0.0, 0.0)
     evt.current_pole.position = vector(0, 0, 0)
     evt.current_pole.body.pos = vector(0, 0, 0)
 
@@ -328,8 +343,8 @@ while isRunning:
             distance_vector *= positionOnPole1.value/(mag(distance_vector))
             skater1.position = distance_vector + pole.position
             skater1.ball.pos = skater1.position * 100
-
-            # Update other skater
+        # Update other skater
+        if len(skaterList) == 2:
             skater2 = skaterList[1]
             distance_vector = skater2.position - pole.position
             distance_vector *= positionOnPole2.value/(mag(distance_vector))
@@ -337,17 +352,26 @@ while isRunning:
             skater2.ball.pos = skater2.position * 100
 
         # Update COM
-        com = vector(0, 0, 0)
+        
+        temp_com = vector(0, 0, 0)
         totMass = 0
         for skater in skaterList:
-            com += skater.mass * skater.position
-        com += pole.mass * pole.position
+            temp_com += skater.mass * skater.position
+        temp_com += pole.mass * pole.position
 
         for skater in skaterList:
             totMass += skater.mass
         totMass += pole.mass
 
-        com /= totMass
+        temp_com /= totMass
+
+        com_change = com - temp_com
+
+        pole.position += com_change
+        pole.body.pos = pole.position*100
+        for skater in skaterList:
+            skater.position += com_change
+            skater.ball.pos = skater.position * 100
 
         sysInertia = pole.findI(com)
         for skater in skaterList:
@@ -382,6 +406,17 @@ while isRunning:
         # Graph new kinetic energy
         kineticEnergyCurve.plot(time, kineticEnergy)
 
+        # Calculate angular momentum
+        global graphAngMom
+        graphAngMom = vector(0, 0, 0)
+        for skater in skaterList:
+            graphAngMom += skater.LWhileSpinning(angVelocity, com)
+        graphAngMom += pole.LWhileSpinning(angVelocity, com)
+
+        angMomCurve.plot(time, mag(graphAngMom))
+
+
+
     else:
         com += sysVelocity/60.0
         comBall.pos = com*100
@@ -393,8 +428,10 @@ while isRunning:
             pole.velocity = sysVelocity
             for skater in skaterList:
                 skater.velocity = sysVelocity
-                
-        kineticEnergyCurve.plot(time, kineticEnergy)
+        if skaterList:       
+            kineticEnergyCurve.plot(time, kineticEnergy)
+        else:
+            kineticEnergyCurve.plot(time, 0)
     time += 1/60.0
 
 
