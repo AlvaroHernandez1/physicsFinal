@@ -1,3 +1,4 @@
+#Web VPython 3.2
 from vpython import *
 
 class Skater:
@@ -77,6 +78,8 @@ scene.lights = []
 scene.userspin = False
 scene.userpan = False
 scene.range = 100
+scene.userzoom = False
+scene.resizable = False
 
 # Controller for loop
 isRunning = True
@@ -112,6 +115,9 @@ angMomCurve.plot(0, 0)
 linMomentumCurve.plot(0, 0)
 
 #User Interface ---Would Love to figure out how to put this on the rirght side!
+
+scene.append_to_caption(" Basic Instructions:\n")
+scene.append_to_caption(" 1. Play with the presets below to adjust the skaters, pole, and collision timing.\n\n 2. Press Start to run the simulation. \n\n 3. After collision, move the skaters along the pole using the position sliders.\n\n 4. Press Reset to restart with the same settings.\n\n 5. Press Factory Reset to return everything to default.\n\n\n")
 scene.append_to_caption(" Skater One\n")
 scene.append_to_caption(" Mass: ")
 s1MassText = wtext(text="10")
@@ -135,7 +141,7 @@ def updateS1V(s):
     s1VText.text = str(s.value)
 s1V = slider(min=0.5, max=3.0, value=1.0, step=0.1, bind=updateS1V)
 
-scene.append_to_caption("\n Skater One Color:")
+scene.append_to_caption("\n Skater One Color: ")
 
 colOne = 'cyan'
 colTwo = colOne
@@ -171,7 +177,7 @@ def updateS2V(s):
     s2VText.text = str(s.value)
 s2V = slider(min=0.5, max=3.0, value=1.0, step=0.1, bind=updateS2V)
 
-scene.append_to_caption("\n Skater Two Color:")
+scene.append_to_caption("\n Skater Two Color: ")
 
 def skaterTwoColor(m):
     global colTwo
@@ -182,16 +188,9 @@ def skaterTwoColor(m):
 
 skaterTwoMenu = menu(choices=['Choose a Color', 'blue', 'green', 'red', 'yellow'], index=0, bind=skaterTwoColor)
 
-scene.append_to_caption("\n\n")
-scene.append_to_caption(" Time to Collision: ")
-timeText = wtext(text="1")
-scene.append_to_caption(" s")
-def updateTimeToCollision(s): 
-    timeText.text = str(s.value)
-timeToCollision = slider(min=1, max=5.0, value=1.0, step=1, bind=updateTimeToCollision)
 
 
-scene.append_to_caption('\n\n\n\n')
+scene.append_to_caption('\n\n\n\n\n')
 
 scene.append_to_caption(" Pole\n Mass: ")
 poleMassText = wtext(text="10")
@@ -200,9 +199,16 @@ def updatePoleMass(s):
     poleMassText.text = str(int(s.value))
 poleMass = slider(min=1, max=50, value=10, step=1, bind=updatePoleMass)
 
+scene.append_to_caption("\n\n\n\n")
+scene.append_to_caption(" Time to Collision: ")
+timeText = wtext(text="1")
+scene.append_to_caption(" s")
+def updateTimeToCollision(s): 
+    timeText.text = str(s.value)
+timeToCollision = slider(min=1, max=5.0, value=1.0, step=1, bind=updateTimeToCollision)
 
 
-scene.append_to_caption("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+scene.append_to_caption("\n\n\n\n\n\n\n")
 
 # Objects
 skaterList = []
@@ -396,7 +402,7 @@ def updatePositionOnPole1(s):
         positionText1.text = str(s.value)
     else:
         s.value = positionOnPole1.value
-positionOnPole1 = slider(min=0.1, max=0.5, value=abs(s1X.value), step=.1, bind=updatePositionOnPole1) # max should be pole length
+positionOnPole1 = slider(min=0.1, max=0.5, value=abs(s1X.value), step=.01, bind=updatePositionOnPole1) # max should be pole length
 
 scene.append_to_caption("Skater One Position on Pole ")
 positionText2 = wtext(text="0.25")
@@ -407,7 +413,7 @@ def updatePositionOnPole2(s):
         positionText2.text = str(s.value)
     else:
         s.value = positionOnPole2.value
-positionOnPole2 = slider(min=0.1, max=0.5, value=abs(s1X.value), step=.1, bind=updatePositionOnPole2)
+positionOnPole2 = slider(min=0.1, max=0.5, value=abs(s1X.value), step=.01, bind=updatePositionOnPole2)
 
 scene.append_to_caption("\n\n")
 
@@ -517,12 +523,12 @@ while isRunning:
         for skater in skaterList:
             skater.updatePosition(1/60.0)
 
-        if skaterList and skaterList[0].position.y <= 0:
+        if len(skaterList) > 0 and skaterList[0].position.y <= 0:
             ballsCollided = True
             pole.velocity = sysVelocity
             for skater in skaterList:
                 skater.velocity = sysVelocity
-        if skaterList:       
+        if len(skaterList) > 0:       
             kineticEnergyCurve.plot(time, kineticEnergy)
         else:
             kineticEnergyCurve.plot(time, 0)
