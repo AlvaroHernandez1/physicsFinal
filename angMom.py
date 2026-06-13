@@ -64,6 +64,11 @@ class Pole:
     def LWhileSpinning(self, angVelocity, cor):
         I = self.findI(cor)
         return I * angVelocity
+    
+    def setMass(self, mass):
+        self.mass = mass
+        self.I_com = self.mass * self.length * self.length * (1/12)
+        self.K = 0
 
 
 scene = canvas(width=600, height=600, background=color.white, align = "left")
@@ -141,7 +146,7 @@ def skaterOneColor(m):
     colOne = val
 
 
-menu(choices=['Choose a Color', 'blue', 'green', 'red', 'yellow'], index=0, bind=skaterOneColor)
+skaterOneMenu = menu(choices=['Choose a Color', 'blue', 'green', 'red', 'yellow'], index=0, bind=skaterOneColor)
 
 scene.append_to_caption("\n\n Skater Two\n")
 scene.append_to_caption(" Mass: ")
@@ -173,7 +178,7 @@ def skaterTwoColor(m):
     colTwo = val
 
 
-menu(choices=['Choose a Color', 'blue', 'green', 'red', 'yellow'], index=0, bind=skaterTwoColor)
+skaterTwoMenu = menu(choices=['Choose a Color', 'blue', 'green', 'red', 'yellow'], index=0, bind=skaterTwoColor)
 
 scene.append_to_caption("\n\n")
 scene.append_to_caption(" Time to Collision: ")
@@ -195,12 +200,73 @@ poleMass = slider(min=1, max=50, value=10, step=1, bind=updatePoleMass)
 
 
 
-scene.append_to_caption("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+scene.append_to_caption("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
 
 # Objects
 skaterList = []
 #Where I can set custom mass and lengths
 pole = Pole(poleMass.value, 1.0)
+
+def factory_reset(evt):
+    global colOne
+    global colTwo
+    global kineticEnergyCurve
+    global angMomCurve
+    global linMomentumCurve
+    global time
+
+    reset_simulation(evt)
+
+    s1Mass.value = 10
+    s1X.value = 0.25
+    s1V.value = 1.0
+
+    s2Mass.value = 10
+    s2X.value = 0.25
+    s2V.value = 1.0
+
+    timeToCollision.value = 1.0
+    poleMass.value = 10
+
+    positionOnPole1.value = 0.25
+    positionOnPole2.value = 0.25
+
+    #need to update text as well
+    s1MassText.text = "10"
+    s1XText.text = "0.25"
+    s1VText.text = "1.0"
+    s2MassText.text = "10"
+    s2XText.text = "0.25"
+    s2VText.text = "1.0"
+    timeText.text = "1.0"
+    poleMassText.text = "10"
+    positionText1.text = "0.25"
+    positionText2.text = "0.25"
+
+    colOne = "cyan"
+    colTwo = "cyan"
+    skaterOneMenu.index = 0
+    skaterTwoMenu.index = 0
+
+
+    pole.setMass(10)
+
+    time = 0
+
+    kineticEnergyCurve.delete()
+    angMomCurve.delete()
+    linMomentumCurve.delete()
+
+    kineticEnergyCurve = gcurve(graph = kineticEnergyGraph)
+    angMomCurve = gcurve(graph = angMomGraph)
+    linMomentumCurve = gcurve(graph = linMomentumGraph)
+
+    kineticEnergyCurve.plot(0, 0)
+    angMomCurve.plot(0, 0)
+    linMomentumCurve.plot(0, 0)
+
+
+
 
 def start_simulation(evt):
     evt.disabled = True
@@ -209,8 +275,8 @@ def start_simulation(evt):
     positionText1.text = str(abs(s1X.value))
     positionText2.text = str(abs(s2X.value))
 
+    pole.setMass(poleMass.value)
     # Y position is equal to Time * Velocity, to make the both balls collide at same time
-    evt.current_pole = Pole(poleMass.value, 1.0)
     evt.current_skaters.append(Skater(vector(-1*s1X.value, timeToCollision.value * s1V.value, 0), vector(0, -s1V.value, 0), s1Mass.value, colOne))
     evt.current_skaters.append(Skater(vector(s2X.value, -timeToCollision.value * s2V.value, 0), vector(0, s2V.value, 0), s2Mass.value, colTwo))
 
@@ -306,8 +372,11 @@ def reset_simulation(evt):
     evt.start_button.disabled = False
 
 
-startButton = button(bind=start_simulation, text="Start Simulation", current_skaters = skaterList, current_pole = pole)
-resetButon = button(bind=reset_simulation, text="Reset Simulation", current_pole = pole, start_button = startButton)
+startButton = button(bind=start_simulation, text="▶ Start", current_skaters = skaterList, background = vector(144/255, 238/255, 144/255))
+scene.append_to_caption("   ")
+resetButon = button(bind=reset_simulation, text="↺ Reset", current_pole = pole, start_button = startButton, background = vector(255/255, 127/255, 127/255))
+scene.append_to_caption("   ")
+factoryResetButton = button(bind=factory_reset, text="⚠ Factory Reset", current_pole=pole, start_button=startButton, background = vector(0,0,0), color = vector(255/255, 255/255, 0))
 
 #Moving Skaters on pole
 scene.append_to_caption("\n\nSkater One Position on Pole ")
@@ -331,6 +400,8 @@ def updatePositionOnPole2(s):
     else:
         s.value = positionOnPole2.value
 positionOnPole2 = slider(min=0.1, max=0.5, value=abs(s1X.value), step=.1, bind=updatePositionOnPole2)
+
+scene.append_to_caption("\n\n")
 
 ice_texture = "https://i.imgur.com/SCIkDjk.png"
 tiles = 4
