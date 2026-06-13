@@ -55,11 +55,11 @@ class Pole:
     def findI(self, cor):
         return self.I_com + self.mass * (mag(self.position - cor)**2)
 
-    def updateK(self, angVelocity, cor):
+    def updateK(self, angVelocity, cor, ):
         I = self.findI(cor)
         KR = 0.5 * I * (mag(angVelocity)**2)
         KT = 0.5 * self.mass * (mag(self.velocity)**2)
-        print(angVelocity)
+        #print(angVelocity)
         self.K = KR + KT
     def LWhileSpinning(self, angVelocity, cor):
         I = self.findI(cor)
@@ -75,10 +75,6 @@ scene.range = 100
 
 # Controller for loop
 isRunning = True
-
-# Objects
-skaterList = []
-pole = Pole(0.00001, 1.0)
 
 # Balls start not collided
 ballsCollided = False
@@ -96,18 +92,23 @@ kineticEnergy = 0
 comBall = sphere(pos = com*100, radius = 4)
 
 # Graphs
-angMomGraph = graph(title = "Angular Momentum Per Trial", xtitle = "Trial", ytitle = "Angular Momentum", align = "left", xmin = 0, ymin = 0, xmax = 10, scroll = True)
+angMomGraph = graph(title = "Angular Momentum Over Time", xtitle = "Trial", ytitle = "Angular Momentum", align = "left", xmin = 0, ymin = 0, xmax = 10, scroll = True)
 angMomCurve = gcurve(graph = angMomGraph)
 
-linMomentumGraph = graph(title = "Linear Momentum Per Trial", xtitle = "Trial", ytitle = "Linear Momentum", align = "left", xmin = 0, ymin = 0)
-linMomentumBars = gvbars(graph = linMomentumGraph, delta = 0.25)
+linMomentumGraph = graph(title = "Linear Momentum Over Time", xtitle = "Time", ytitle = "Linear Momentum", align = "left", xmin = 0, xmax = 10, scroll = True, ymin = 0)
+linMomentumCurve = gcurve(graph = linMomentumGraph)
 
 kineticEnergyGraph = graph(title = "Kinetic Energy Over Time", xtitle = "Time", ytitle = "Kinetic Energy", align = "left", xmin = 0, xmax = 10, scroll = True, ymin = 0)
 kineticEnergyCurve = gcurve(graph = kineticEnergyGraph)
 
+#ensures all three graphs are plotted at same time
+kineticEnergyCurve.plot(0, 0)
+angMomCurve.plot(0, 0)
+linMomentumCurve.plot(0, 0)
+
 #User Interface ---Would Love to figure out how to put this on the rirght side!
-scene.append_to_caption("Skater 1\n")
-scene.append_to_caption("Mass: ")
+scene.append_to_caption(" Skater One\n")
+scene.append_to_caption(" Mass: ")
 s1MassText = wtext(text="10")
 def updateS1Mass(s): 
     s1MassText.text = str(int(s.value))
@@ -129,8 +130,21 @@ def updateS1V(s):
     s1VText.text = str(s.value)
 s1V = slider(min=0.5, max=3.0, value=1.0, step=0.1, bind=updateS1V)
 
-scene.append_to_caption("\n\nSkater 2\n")
-scene.append_to_caption("Mass: ")
+scene.append_to_caption("\n Skater One Color:")
+
+colOne = 'cyan'
+colTwo = colOne
+
+def skaterOneColor(m):
+    global colOne
+    val = m.selected
+    colOne = val
+
+
+menu(choices=['Choose a Color', 'blue', 'green', 'red', 'yellow'], index=0, bind=skaterOneColor)
+
+scene.append_to_caption("\n\n Skater Two\n")
+scene.append_to_caption(" Mass: ")
 s2MassText = wtext(text="10")
 scene.append_to_caption(" kg")
 def updateS2Mass(s): 
@@ -151,29 +165,7 @@ def updateS2V(s):
     s2VText.text = str(s.value)
 s2V = slider(min=0.5, max=3.0, value=1.0, step=0.1, bind=updateS2V)
 
-scene.append_to_caption("\n\n")
-scene.append_to_caption("Time to Collision: ")
-timeText = wtext(text="1")
-scene.append_to_caption(" s")
-def updateTimeToCollission(s): 
-    timeText.text = str(s.value)
-timeToCollision = slider(min=1, max=5.0, value=1.0, step=1, bind=updateTimeToCollission)
-
-
-scene.append_to_caption("\n\n Skater One Color:")
-
-colOne = 'cyan'
-colTwo = colOne
-
-def skaterOneColor(m):
-    global colOne
-    val = m.selected
-    colOne = val
-
-
-menu(choices=['Choose a Color', 'blue', 'green', 'red', 'yellow'], index=0, bind=skaterOneColor)
-
-scene.append_to_caption("Skater Two Color:")
+scene.append_to_caption("\n Skater Two Color:")
 
 def skaterTwoColor(m):
     global colTwo
@@ -183,11 +175,32 @@ def skaterTwoColor(m):
 
 menu(choices=['Choose a Color', 'blue', 'green', 'red', 'yellow'], index=0, bind=skaterTwoColor)
 
-scene.append_to_caption('\n')
+scene.append_to_caption("\n\n")
+scene.append_to_caption(" Time to Collision: ")
+timeText = wtext(text="1")
+scene.append_to_caption(" s")
+def updateTimeToCollision(s): 
+    timeText.text = str(s.value)
+timeToCollision = slider(min=1, max=5.0, value=1.0, step=1, bind=updateTimeToCollision)
 
 
-scene.append_to_caption("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+scene.append_to_caption('\n\n\n\n')
 
+scene.append_to_caption(" Pole\n Mass: ")
+poleMassText = wtext(text="10")
+scene.append_to_caption(" kg")
+def updatePoleMass(s): 
+    poleMassText.text = str(int(s.value))
+poleMass = slider(min=1, max=50, value=10, step=1, bind=updatePoleMass)
+
+
+
+scene.append_to_caption("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+
+# Objects
+skaterList = []
+#Where I can set custom mass and lengths
+pole = Pole(poleMass.value, 1.0)
 
 def start_simulation(evt):
     evt.disabled = True
@@ -197,6 +210,7 @@ def start_simulation(evt):
     positionText2.text = str(abs(s2X.value))
 
     # Y position is equal to Time * Velocity, to make the both balls collide at same time
+    evt.current_pole = Pole(poleMass.value, 1.0)
     evt.current_skaters.append(Skater(vector(-1*s1X.value, timeToCollision.value * s1V.value, 0), vector(0, -s1V.value, 0), s1Mass.value, colOne))
     evt.current_skaters.append(Skater(vector(s2X.value, -timeToCollision.value * s2V.value, 0), vector(0, s2V.value, 0), s2Mass.value, colTwo))
 
@@ -214,7 +228,6 @@ def start_simulation(evt):
     global angMomBars
 
     global linMomentumGraph
-    global linMomentumBars
 
     global trial
 
@@ -254,7 +267,7 @@ def start_simulation(evt):
 
     # Plot graphs
     #angMomBars.plot(trial, mag(sysAngMom))
-    linMomentumBars.plot(trial, mag(sysMom))
+    #linMomentumBars.plot(trial, mag(sysMom))
     
 
 
@@ -272,7 +285,7 @@ def reset_simulation(evt):
     #angVelocity = 0
 
     global sysAngMom
-    sysAngMom = 0
+    sysAngMom = vector(0,0,0)
     scene.camera.pos = vector(0,0,173)
     for skater in skaterList:
         skater.ball.visible = False
@@ -293,7 +306,7 @@ def reset_simulation(evt):
     evt.start_button.disabled = False
 
 
-startButton = button(bind=start_simulation, text="Start Simulation", current_skaters = skaterList)
+startButton = button(bind=start_simulation, text="Start Simulation", current_skaters = skaterList, current_pole = pole)
 resetButon = button(bind=reset_simulation, text="Reset Simulation", current_pole = pole, start_button = startButton)
 
 #Moving Skaters on pole
@@ -414,6 +427,8 @@ while isRunning:
         graphAngMom += pole.LWhileSpinning(angVelocity, com)
 
         angMomCurve.plot(time, mag(graphAngMom))
+        linMomentumCurve.plot(time, mag(sysMom))
+
 
 
 
@@ -432,6 +447,8 @@ while isRunning:
             kineticEnergyCurve.plot(time, kineticEnergy)
         else:
             kineticEnergyCurve.plot(time, 0)
+        linMomentumCurve.plot(time, mag(sysMom))
+        angMomCurve.plot(time,0)
     time += 1/60.0
 
 
