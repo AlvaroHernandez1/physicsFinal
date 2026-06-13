@@ -97,13 +97,13 @@ kineticEnergy = 0
 comBall = sphere(pos = com*100, radius = 4)
 
 # Graphs
-angMomGraph = graph(title = "Angular Momentum Over Time", xtitle = "Trial", ytitle = "Angular Momentum", align = "left", xmin = 0, ymin = 0, xmax = 10, scroll = True)
+angMomGraph = graph(title = "Angular Momentum Over Time", xtitle = "Time (s)", ytitle = "Angular Momentum (kg·m²/s)", align = "left", xmin = 0, ymin = 0, xmax = 10, scroll = True)
 angMomCurve = gcurve(graph = angMomGraph)
 
-linMomentumGraph = graph(title = "Linear Momentum Over Time", xtitle = "Time", ytitle = "Linear Momentum", align = "left", xmin = 0, xmax = 10, scroll = True, ymin = 0)
+linMomentumGraph = graph(title = "Linear Momentum Over Time", xtitle = "Time (s)", ytitle = "Linear Momentum (kg·m/s)", align = "left", xmin = 0, xmax = 10, scroll = True, ymin = 0)
 linMomentumCurve = gcurve(graph = linMomentumGraph)
 
-kineticEnergyGraph = graph(title = "Kinetic Energy Over Time", xtitle = "Time", ytitle = "Kinetic Energy", align = "left", xmin = 0, xmax = 10, scroll = True, ymin = 0)
+kineticEnergyGraph = graph(title = "Kinetic Energy Over Time", xtitle = "Time (s)", ytitle = "Kinetic Energy (J)", align = "left", xmin = 0, xmax = 10, scroll = True, ymin = 0)
 kineticEnergyCurve = gcurve(graph = kineticEnergyGraph)
 
 #ensures all three graphs are plotted at same time
@@ -142,8 +142,9 @@ colTwo = colOne
 
 def skaterOneColor(m):
     global colOne
-    val = m.selected
-    colOne = val
+    if m.selected != "Choose a Color":
+        val = m.selected
+        colOne = val
 
 
 skaterOneMenu = menu(choices=['Choose a Color', 'blue', 'green', 'red', 'yellow'], index=0, bind=skaterOneColor)
@@ -174,8 +175,9 @@ scene.append_to_caption("\n Skater Two Color:")
 
 def skaterTwoColor(m):
     global colTwo
-    val = m.selected
-    colTwo = val
+    if m.selected != "Choose a Color":
+        val = m.selected
+        colTwo = val
 
 
 skaterTwoMenu = menu(choices=['Choose a Color', 'blue', 'green', 'red', 'yellow'], index=0, bind=skaterTwoColor)
@@ -243,11 +245,11 @@ def factory_reset(evt):
     positionText1.text = "0.25"
     positionText2.text = "0.25"
 
-    colOne = "cyan"
-    colTwo = "cyan"
     skaterOneMenu.index = 0
     skaterTwoMenu.index = 0
 
+    colOne = "cyan"
+    colTwo = "cyan"
 
     pole.setMass(10)
 
@@ -368,6 +370,12 @@ def reset_simulation(evt):
 
     com = vector(0, 0, 0)
     sysVelocity = vector(0, 0, 0)
+
+    global sysMom
+    global kineticEnergy
+
+    sysMom = vector(0,0,0)
+    kineticEnergy = 0
 
     evt.start_button.disabled = False
 
