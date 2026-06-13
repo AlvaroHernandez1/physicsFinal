@@ -117,7 +117,7 @@ linMomentumCurve.plot(0, 0)
 #User Interface ---Would Love to figure out how to put this on the rirght side!
 
 scene.append_to_caption(" Basic Instructions:\n")
-scene.append_to_caption(" 1. Play with the presets below to adjust the skaters, pole, and collision timing.\n\n 2. Press Start to run the simulation. \n\n 3. After collision, move the skaters along the pole using the position sliders.\n\n 4. Press Reset to restart with the same settings.\n\n 5. Press Factory Reset to return everything to default.\n\n\n")
+scene.append_to_caption(" 1. Play with the presets below to adjust the skaters, pole, and collision timing.\n\n 2. Press Start to run the simulation. \n\n 3. After collision, move the skaters along the pole using the position sliders.\n\n 4. Press Reset to restart with the same settings.\n\n 5. Press Factory Reset to return everything to default. \n\n Note: The smaller white circle represents the system's center of mass.\n\n\n")
 scene.append_to_caption(" Skater One\n")
 scene.append_to_caption(" Mass: ")
 s1MassText = wtext(text="10")
@@ -208,7 +208,7 @@ def updateTimeToCollision(s):
 timeToCollision = slider(min=1, max=5.0, value=1.0, step=1, bind=updateTimeToCollision)
 
 
-scene.append_to_caption("\n\n\n\n\n\n\n")
+scene.append_to_caption("\n\n\n\n\n")
 
 # Objects
 skaterList = []
@@ -535,5 +535,4 @@ while isRunning:
         linMomentumCurve.plot(time, mag(sysMom))
         angMomCurve.plot(time,0)
     time += 1/60.0
-
 
