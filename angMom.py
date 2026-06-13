@@ -205,7 +205,7 @@ timeText = wtext(text="1")
 scene.append_to_caption(" s")
 def updateTimeToCollision(s): 
     timeText.text = str(s.value)
-timeToCollision = slider(min=1, max=5.0, value=1.0, step=1, bind=updateTimeToCollision)
+timeToCollision = slider(min=1, max=5, value=1, step=1, bind=updateTimeToCollision)
 
 
 scene.append_to_caption("\n\n\n\n\n")
@@ -393,7 +393,7 @@ scene.append_to_caption("   ")
 factoryResetButton = button(bind=factory_reset, text="⚠ Factory Reset", current_pole=pole, start_button=startButton, background = vector(0,0,0), color = vector(255/255, 255/255, 0))
 
 #Moving Skaters on pole
-scene.append_to_caption("\n\nSkater One Position on Pole ")
+scene.append_to_caption("\n\nSkater One Position on Pole: ")
 positionText1 = wtext(text="0.25")
 scene.append_to_caption(" m")
 def updatePositionOnPole1(s):
@@ -402,9 +402,9 @@ def updatePositionOnPole1(s):
         positionText1.text = str(s.value)
     else:
         s.value = positionOnPole1.value
-positionOnPole1 = slider(min=0.1, max=0.5, value=abs(s1X.value), step=.01, bind=updatePositionOnPole1) # max should be pole length
+positionOnPole1 = slider(min=0.01, max=0.5, value=abs(s1X.value), step=.01, bind=updatePositionOnPole1)
 
-scene.append_to_caption("Skater One Position on Pole ")
+scene.append_to_caption("Skater Two Position on Pole: ")
 positionText2 = wtext(text="0.25")
 scene.append_to_caption(" m")
 def updatePositionOnPole2(s):
@@ -413,7 +413,7 @@ def updatePositionOnPole2(s):
         positionText2.text = str(s.value)
     else:
         s.value = positionOnPole2.value
-positionOnPole2 = slider(min=0.1, max=0.5, value=abs(s1X.value), step=.01, bind=updatePositionOnPole2)
+positionOnPole2 = slider(min=0.01, max=0.5, value=abs(s2X.value), step=.01, bind=updatePositionOnPole2)
 
 scene.append_to_caption("\n\n")
 
@@ -434,19 +434,16 @@ time = 0
 while isRunning:
     rate(60)
     if ballsCollided:
-        # Updating Ball Position
+        # Updating skater positions
         if len(skaterList) == 2:
+            pole_axis = norm(pole.body.axis)
+
             skater1 = skaterList[0]
-            distance_vector = skater1.position - pole.position
-            distance_vector *= positionOnPole1.value/(mag(distance_vector))
-            skater1.position = distance_vector + pole.position
+            skater1.position = pole.position - pole_axis * positionOnPole1.value
             skater1.ball.pos = skater1.position * 100
-        # Update other skater
-        if len(skaterList) == 2:
+
             skater2 = skaterList[1]
-            distance_vector = skater2.position - pole.position
-            distance_vector *= positionOnPole2.value/(mag(distance_vector))
-            skater2.position = distance_vector + pole.position
+            skater2.position = pole.position + pole_axis * positionOnPole2.value
             skater2.ball.pos = skater2.position * 100
 
         # Update COM
@@ -518,11 +515,15 @@ while isRunning:
 
 
     else:
+        positionOnPole1.value = abs(s1X.value)
+        positionOnPole2.value = abs(s2X.value)
+        positionText1.text = str(abs(s1X.value))
+        positionText2.text = str(abs(s2X.value))
+
         com += sysVelocity/60.0
         comBall.pos = com*100
         for skater in skaterList:
             skater.updatePosition(1/60.0)
-
         if len(skaterList) > 0 and skaterList[0].position.y <= 0:
             ballsCollided = True
             pole.velocity = sysVelocity
